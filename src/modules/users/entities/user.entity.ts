@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { RoleEnum } from 'src/modules/users/enums/role.enum';
 import { Customer } from 'src/modules/users/entities/customer.entity';
+import { Exclude } from 'class-transformer';
 import { AppConstants } from 'src/common/constants/app.constants';
 
 @Entity({name: 'users'})
@@ -14,8 +15,10 @@ export class User {
     @Column({type: 'varchar', length: AppConstants.MAX_LENGTH.USER.USERNAME, unique: true})
     username: string;
 
+    // TODO: guardar la contraseña con hash (hoy se guarda en texto plano)
+    @Exclude()
     @Column({ type: 'varchar', length: AppConstants.MAX_LENGTH.USER.PASSWORD })
-    password: string; //encript
+    password: string;
 
     @Column({
         type: 'enum',

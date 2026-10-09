@@ -1,108 +1,118 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Store NestJS
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST de una tienda construida con **NestJS 11**, **TypeORM** y **PostgreSQL**: productos, marcas, categorías, clientes, usuarios y órdenes, con validación de datos, migraciones y documentación Swagger.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Stack
 
-## Description
+- [NestJS 11](https://nestjs.com) y TypeScript
+- [TypeORM](https://typeorm.io) con PostgreSQL (migraciones incluidas)
+- `class-validator` y `class-transformer` para validar y transformar los DTO
+- `@nestjs/config` + Joi para validar las variables de entorno
+- Swagger (`@nestjs/swagger`)
+- Jest para los tests
+- Docker Compose para la base de datos (PostgreSQL + pgAdmin; MySQL + phpMyAdmin opcionales)
 
-STATUS: FINALIZED
+## Estructura
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+```
+src/
+├── common/            # constantes, entidad base de auditoría y pipes
+├── modules/
+│   ├── database/      # conexión, data source y migraciones
+│   ├── products/      # productos, marcas y categorías
+│   └── users/         # usuarios, clientes, órdenes e ítems de orden
+├── config.ts          # configuración tipada (registerAs)
+└── main.ts            # arranque, ValidationPipe global y Swagger
 ```
 
-## Compile and run the project
+## Cómo ejecutar
+
+Requiere Node.js 20.
+
+1. Instalar dependencias:
+   ```bash
+   npm install
+   ```
+
+2. Levantar la base de datos:
+   ```bash
+   docker compose up -d postgres
+   ```
+
+3. Crear el archivo `config/.env` con las variables de la tabla de abajo. Los archivos `.env` no se suben al repositorio.
+
+4. Crear las tablas:
+   ```bash
+   npm run migrations:run
+   ```
+
+5. Arrancar en modo desarrollo:
+   ```bash
+   npm run start:dev
+   ```
+
+La API queda en `http://localhost:3000` y Swagger en `http://localhost:3000/docs`.
+
+Al arrancar, la aplicación consulta `https://jsonplaceholder.typicode.com/todos` (ejemplo de `useFactory` asíncrono), así que necesita conexión a internet.
+
+## Variables de entorno
+
+El archivo se elige con `NODE_ENV`: `config/.env` (por defecto), `config/.stag.env` (`stag`) o `config/.prod.env` (`prod`).
+
+| Variable | Ejemplo | Para qué sirve |
+|---|---|---|
+| `API_KEY` | `cambia-este-valor` | Clave de ejemplo inyectada como proveedor. Obligatoria. |
+| `DATABASE_NAME` | `store_nestjs` | Obligatoria. |
+| `DATABASE_PORT` | `5432` | Obligatoria. |
+| `POSTGRES_HOST` | `localhost` | Host de PostgreSQL. |
+| `POSTGRES_PORT` | `5432` | Puerto de PostgreSQL. |
+| `POSTGRES_DB` | `store_nestjs` | Base de datos. |
+| `POSTGRES_USER` | `user_store_nestjs` | Usuario. |
+| `POSTGRES_PASSWORD` | `admin_store_nestjs` | Contraseña. |
+| `PORT` | `3000` | Puerto de la API. |
+
+Los valores de ejemplo de PostgreSQL coinciden con los de `docker-compose.yml` y son solo para desarrollo local.
+
+## Endpoints
+
+| Recurso | Ruta base | Operaciones |
+|---|---|---|
+| Productos | `/products` | Listar (con filtros y paginación), ver, crear, editar, borrar, y agregar o quitar categorías |
+| Marcas | `/brands` | CRUD |
+| Categorías | `/categories` | CRUD |
+| Clientes | `/customers` | CRUD |
+| Usuarios | `/users` | CRUD |
+| Órdenes | `/orders` | CRUD |
+| Ítems de orden | `/order-details` | Crear, editar y borrar |
+
+El detalle de cada operación está en Swagger.
+
+## Tests
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm test
 ```
 
-## Run tests
+## Scripts
 
-```bash
-# unit tests
-$ npm run test
+| Comando | Qué hace |
+|---|---|
+| `npm run start:dev` | Arranca con recarga automática |
+| `npm run build` | Compila a `dist/` |
+| `npm run start:prod` | Arranca la versión compilada |
+| `npm test` | Tests unitarios |
+| `npm run lint` | ESLint |
+| `npm run migrations:generate -- <ruta>` | Genera una migración a partir de las entidades |
+| `npm run migrations:run` | Aplica las migraciones pendientes |
+| `npm run migrations:show` | Muestra el estado de las migraciones |
+| `npm run migrations:revert` | Revierte la última migración |
 
-# e2e tests
-$ npm run test:e2e
+## Pendiente
 
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-
-
+- Las contraseñas de los usuarios se guardan en texto plano; falta aplicar un hash (por ejemplo bcrypt) y ampliar la columna. Ya no se devuelven en las respuestas de la API.
+- No hay autenticación en los endpoints.
 
 ## Apuntes
-- link swagger: http://localhost:3000/docs#/
 ### Comandos:
 - node --version
 - npm i -g @nestjs/cli

@@ -7,7 +7,10 @@ describe('ProductsService', () => {
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [ProductsService],
-        }).compile();
+        })
+            // Las dependencias (repositorios, servicios, config) se simulan
+            .useMocker(() => ({}))
+            .compile();
 
         service = module.get<ProductsService>(ProductsService);
     });

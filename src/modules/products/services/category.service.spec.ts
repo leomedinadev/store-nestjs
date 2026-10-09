@@ -7,7 +7,10 @@ describe('CategoryService', () => {
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [CategoryService],
-        }).compile();
+        })
+            // Las dependencias (repositorios, servicios, config) se simulan
+            .useMocker(() => ({}))
+            .compile();
 
         service = module.get<CategoryService>(CategoryService);
     });

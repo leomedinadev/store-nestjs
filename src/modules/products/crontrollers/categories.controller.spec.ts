@@ -7,7 +7,10 @@ describe('CategoriesController', () => {
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [CategoriesController],
-        }).compile();
+        })
+            // Las dependencias (repositorios, servicios, config) se simulan
+            .useMocker(() => ({}))
+            .compile();
 
         controller = module.get<CategoriesController>(CategoriesController);
     });
