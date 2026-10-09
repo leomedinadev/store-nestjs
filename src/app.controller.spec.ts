@@ -9,7 +9,10 @@ describe('AppController', () => {
         const app: TestingModule = await Test.createTestingModule({
             controllers: [AppController],
             providers: [AppService],
-        }).compile();
+        })
+            // Las dependencias (repositorios, servicios, config) se simulan
+            .useMocker(() => ({}))
+            .compile();
 
         appController = app.get<AppController>(AppController);
     });
